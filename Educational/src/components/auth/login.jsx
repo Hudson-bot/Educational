@@ -1,23 +1,27 @@
-import { FaGoogle } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../utils/axios';
 
 const LoginPage = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.id]: e.target.value });
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', formData);
-      alert('Login successful!');
+      setLoading(true);
+      setError('');
+      const res = await api.post('/auth/login', formData);
       localStorage.setItem('token', res.data.token);
-      navigate('/dashboard'); // replace with actual route
+      navigate('/dashboard');
     } catch (err) {
-      alert(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -58,9 +62,19 @@ const LoginPage = () => {
               />
             </div>
 
-            <button onClick={handleSubmit} className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg">
-              Sign In
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 rounded-lg"
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
+
+            {error && (
+              <div className="mt-4 text-red-400 text-sm text-center">
+                {error}
+              </div>
+            )}
 
             <div className="text-center mt-6 text-gray-400">
               Don't have an account?{' '}
