@@ -17,7 +17,19 @@ const LoginPage = () => {
       setError('');
       const res = await api.post('/auth/login', formData);
       localStorage.setItem('token', res.data.token);
-      navigate('/dashboard');
+      localStorage.setItem('role', res.data.role);
+      localStorage.setItem('user', JSON.stringify({
+        name: res.data.name,
+        email: res.data.email,
+        role: res.data.role
+      }));
+      
+      // Redirect based on role
+      if (res.data.role === 'teacher') {
+        navigate('/upload');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {

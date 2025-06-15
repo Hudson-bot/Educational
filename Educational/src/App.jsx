@@ -3,6 +3,8 @@ import './App.css'
 import LoginPage from './components/auth/login'
 import SignupPage from './components/auth/SignUp'
 import ForgotPasswordPage from "./components/auth/forgotPassword";
+import ChooseUploadType from "./components/content/ChooseUploadType";
+import Dashboard from "./components/content/Dashboard";
 
 function App() {
   return (
@@ -11,6 +13,8 @@ function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage/>} />
+      <Route path="/upload" element={<ChooseUploadType />} />
+      <Route path="/dashboard" element={<Dashboard />} />
     </Routes>
   )
 }
