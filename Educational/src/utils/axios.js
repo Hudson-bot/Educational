@@ -1,44 +1,81 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api', // Changed from absolute to relative URL
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 5000,
+  timeout: 15000, // 15 second timeout
 });
 
-// Add request interceptor
+// Request interceptor
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    // Add auth token if available
+    const token = localStorage.getItem('authToken');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log request in development
+    if (import.meta.env.MODE === 'development') {
+      console.log('Making request to:', config.url);
+    }
+    
     return config;
   },
   (error) => {
+    console.error('Request Error:', error);
     return Promise.reject(error);
   }
 );
 
-// Add response interceptor
+// Response interceptor
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (import.meta.env.MODE === 'development') {
+      console.log('Response from:', response.config.url, response.data);
+    }
+    return response;
+  },
   (error) => {
-    console.error('API Error:', error);
+    const errorDetails = {
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+      },
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    };
+
+    console.error('API Error:', errorDetails);
+
+    // Enhanced error handling
     if (error.code === 'ECONNABORTED') {
-      return Promise.reject({ response: { data: { message: 'Request timed out' } } });
-    }
-    if (!error.response) {
-      return Promise.reject({ 
-        response: { 
-          data: { 
-            message: 'Network error - please check your connection' 
-          } 
+      error.response = { 
+        data: { 
+          message: 'Request timeout - the server took too long to respond',
+          code: 'TIMEOUT_ERROR'
         } 
-      });
+      };
     }
+    else if (!error.response) {
+      error.response = {
+        data: {
+          message: 'Network error - please check your internet connection',
+          code: 'NETWORK_ERROR'
+        }
+      };
+    }
+    else if (error.response.status === 404) {
+      error.response.data = {
+        ...error.response.data,
+        message: 'Endpoint not found - please check the API URL',
+        code: 'ENDPOINT_NOT_FOUND'
+      };
+    }
+
     return Promise.reject(error);
   }
 );

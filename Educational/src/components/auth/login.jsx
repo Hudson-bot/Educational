@@ -28,7 +28,7 @@ const LoginPage = () => {
       if (res.data.role === 'teacher') {
         navigate('/upload');
       } else {
-        navigate('/dashboard');
+        navigate('/student/dashboard');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
