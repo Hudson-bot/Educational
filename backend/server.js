@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import path from 'path';
 import authRoutes from './routes/authRoutes.js';
-import contentRoutes from './routes/contentRoutes.js'; // ✅ Add content routes
+import contentRoutes from './routes/contentRoutes.js';
+import interviewRoutes from './routes/interviewRoutes.js';
 import connectDB from './config/db.js';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
@@ -26,7 +27,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // ✅ Ser
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/content', contentRoutes); // ✅ Mount content routes
+app.use('/api/content', contentRoutes);
+app.use('/api/interview', interviewRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
