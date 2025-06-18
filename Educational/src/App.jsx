@@ -10,22 +10,25 @@ import AllContent from "./components/student/AllContent";
 import Notes from "./components/student/Notes";
 import InterviewBot from "./components/student/InterviewBot";
 import SimpleProfileSettings from "./components/student/SimpleProfileSettings";
+import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LoginPage/>} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordPage/>} />
-      <Route path="/upload" element={<ChooseUploadType />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/student/dashboard" element={<StudentDashboard />} />
-      <Route path="/student/content" element={<AllContent />} />
-      <Route path="/student/notes" element={<Notes />} />
-      <Route path="/student/interview" element={<InterviewBot />} />
-      <Route path="/student/profile-settings" element={<SimpleProfileSettings />} />
-    </Routes>
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<LoginPage/>} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage/>} />
+        <Route path="/upload" element={<ChooseUploadType />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route path="/student/content" element={<AllContent />} />
+        <Route path="/student/notes" element={<Notes />} />
+        <Route path="/student/interview" element={<InterviewBot />} />
+        <Route path="/student/profile-settings" element={<SimpleProfileSettings />} />
+      </Routes>
+    </AuthProvider>
   )
 }
 

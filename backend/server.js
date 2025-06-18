@@ -8,6 +8,7 @@ import interviewRoutes from './routes/interviewRoutes.js';
 import connectDB from './config/db.js';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
+import notesRoutes from './routes/notesRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -15,7 +16,10 @@ connectDB();
 const app = express();
 
 // Enable CORS
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
 // Body parser
 app.use(express.json());
@@ -29,6 +33,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // ✅ Ser
 app.use('/api/auth', authRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/interview', interviewRoutes);
+app.use('/api/v1/content/notes', notesRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

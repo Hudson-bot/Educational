@@ -5,6 +5,8 @@ import axios from '../../utils/axios';
 import SpeechRecognition, {
   useSpeechRecognition
 } from 'react-speech-recognition';
+import { Link, useNavigate } from 'react-router-dom';
+import { FiLogOut, FiArrowLeft } from 'react-icons/fi';
 
 Modal.setAppElement('#root');
 
@@ -28,6 +30,8 @@ const InterviewBot = () => {
     resetTranscript,
     browserSupportsSpeechRecognition
   } = useSpeechRecognition();
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!browserSupportsSpeechRecognition) {
@@ -146,136 +150,172 @@ const InterviewBot = () => {
     setError('');
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  const NavBar = () => (
+    <nav className="bg-white/10 backdrop-blur-sm border-b border-white/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-4">
+            <Link
+              to="/student/dashboard"
+              className="flex items-center text-white hover:text-gray-300 transition-colors"
+            >
+              <FiArrowLeft className="mr-2" /> Back to Dashboard
+            </Link>
+            <span className="text-xl font-semibold text-white">EduPortal</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center">
+            </div>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+
   return (
-    <div className="max-w-2xl mx-auto p-5">
-      {questions.length === 0 && !showFeedback && (
-        <button
-          className="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 transition-colors"
-          onClick={() => setIsModalOpen(true)}
-          disabled={isLoading}
+    <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-gray-900 to-black overflow-y-auto">
+      <NavBar />
+      <div className="p-5">
+        {questions.length === 0 && !showFeedback && (
+          <button
+            className="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 transition-colors"
+            onClick={() => setIsModalOpen(true)}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Loading...' : 'Start Interview'}
+          </button>
+        )}
+
+        <Modal
+          isOpen={isModalOpen}
+          onRequestClose={() => setIsModalOpen(false)}
+          contentLabel="Skill Selection"
+          className="bg-white p-6 rounded-lg shadow-xl max-w-md mx-auto mt-20 outline-none"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center pt-20"
         >
-          {isLoading ? 'Loading...' : 'Start Interview'}
-        </button>
-      )}
+          <h2 className="text-2xl font-bold mb-4 text-gray-800">Choose Skills and Interest</h2>
 
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={() => setIsModalOpen(false)}
-        contentLabel="Skill Selection"
-        className="bg-white p-6 rounded-lg shadow-xl max-w-md mx-auto mt-20 outline-none"
-        overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center pt-20"
-      >
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">Choose Skills and Interest</h2>
+          {error && (
+            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+              <p className="font-bold">Error:</p>
+              <p>{error}</p>
+            </div>
+          )}
 
-        {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
-            <p className="font-bold">Error:</p>
-            <p>{error}</p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {skillOptions.map((skill) => (
+              <button
+                key={uuidv4()}
+                onClick={() => toggleSkill(skill)}
+                className={`px-3 py-1 rounded-full border ${
+                  selectedSkills.includes(skill)
+                    ? 'bg-green-100 border-green-500 text-green-800'
+                    : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {skill}
+              </button>
+            ))}
+          </div>
+
+          <input
+            type="text"
+            placeholder="Your Area of Interest (e.g., Web Development)"
+            value={interest}
+            onChange={(e) => setInterest(e.target.value)}
+            className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-green-500 focus:border-transparent"
+          />
+
+          <button
+            onClick={handleStartInterview}
+            className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Generating...' : 'Generate Questions'}
+          </button>
+        </Modal>
+
+        {questions.length > 0 && !showFeedback && (
+          <div className="bg-gray-50 p-6 rounded-lg shadow-md mt-6 relative">
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-sm font-semibold text-gray-500">
+                Question {currentQuestionIndex + 1} of {questions.length}
+              </div>
+              <div className={`text-sm font-bold ${timeLeft <= 10 ? 'text-red-600' : 'text-gray-600'}`}>
+                Time left: {timeLeft}s
+              </div>
+            </div>
+
+            <h3 className="text-xl font-medium text-gray-800 mb-4">
+              {questions[currentQuestionIndex]}
+            </h3>
+
+            <textarea
+              rows={5}
+              value={transcript}
+              placeholder="Your spoken answer will appear here..."
+              readOnly
+              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100"
+            />
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={() => {
+                  resetTranscript();
+                  SpeechRecognition.startListening({ continuous: true, language: 'en-IN' });
+                }}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                type="button"
+              >
+                🎤 {listening ? 'Listening...' : 'Speak'}
+              </button>
+
+              <button
+                onClick={() => {
+                  SpeechRecognition.stopListening();
+                  handleAnswerSubmit();
+                }}
+                className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Submitting...' : 'Submit Answer'}
+              </button>
+            </div>
+
+            {error && (
+              <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mt-3 rounded">
+                {error}
+              </div>
+            )}
           </div>
         )}
 
-        <div className="flex flex-wrap gap-2 mb-4">
-          {skillOptions.map((skill) => (
-            <button
-              key={uuidv4()}
-              onClick={() => toggleSkill(skill)}
-              className={`px-3 py-1 rounded-full border ${
-                selectedSkills.includes(skill)
-                  ? 'bg-green-100 border-green-500 text-green-800'
-                  : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {skill}
-            </button>
-          ))}
-        </div>
-
-        <input
-          type="text"
-          placeholder="Your Area of Interest (e.g., Web Development)"
-          value={interest}
-          onChange={(e) => setInterest(e.target.value)}
-          className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:ring-2 focus:ring-green-500 focus:border-transparent"
-        />
-
-        <button
-          onClick={handleStartInterview}
-          className="w-full bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 transition-colors"
-          disabled={isLoading}
-        >
-          {isLoading ? 'Generating...' : 'Generate Questions'}
-        </button>
-      </Modal>
-
-      {questions.length > 0 && !showFeedback && (
-        <div className="bg-gray-50 p-6 rounded-lg shadow-md mt-6 relative">
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-sm font-semibold text-gray-500">
-              Question {currentQuestionIndex + 1} of {questions.length}
+        {showFeedback && (
+          <div className="bg-blue-50 p-6 rounded-lg shadow-md mt-6">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">Interview Feedback</h3>
+            <div className="whitespace-pre-wrap text-gray-700 mb-6 leading-relaxed">
+              {feedback}
             </div>
-            <div className={`text-sm font-bold ${timeLeft <= 10 ? 'text-red-600' : 'text-gray-600'}`}>
-              Time left: {timeLeft}s
-            </div>
-          </div>
-
-          <h3 className="text-xl font-medium text-gray-800 mb-4">
-            {questions[currentQuestionIndex]}
-          </h3>
-
-          <textarea
-            rows={5}
-            value={transcript}
-            placeholder="Your spoken answer will appear here..."
-            readOnly
-            className="w-full p-3 border border-gray-300 rounded-lg bg-gray-100"
-          />
-
-          <div className="flex justify-between items-center mt-4">
             <button
-              onClick={() => {
-                resetTranscript();
-                SpeechRecognition.startListening({ continuous: true, language: 'en-IN' });
-              }}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-              type="button"
+              onClick={resetInterview}
+              className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-colors"
             >
-              🎤 {listening ? 'Listening...' : 'Speak'}
-            </button>
-
-            <button
-              onClick={() => {
-                SpeechRecognition.stopListening();
-                handleAnswerSubmit();
-              }}
-              className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-              disabled={isLoading}
-            >
-              {isLoading ? 'Submitting...' : 'Submit Answer'}
+              Start New Interview
             </button>
           </div>
-
-          {error && (
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mt-3 rounded">
-              {error}
-            </div>
-          )}
-        </div>
-      )}
-
-      {showFeedback && (
-        <div className="bg-blue-50 p-6 rounded-lg shadow-md mt-6">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">Interview Feedback</h3>
-          <div className="whitespace-pre-wrap text-gray-700 mb-6 leading-relaxed">
-            {feedback}
-          </div>
-          <button
-            onClick={resetInterview}
-            className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-colors"
-          >
-            Start New Interview
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

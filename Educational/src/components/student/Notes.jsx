@@ -1,31 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { FiSave, FiTrash2, FiFileText } from 'react-icons/fi';
+import { FiSave, FiTrash2, FiFileText, FiLogOut, FiArrowLeft } from 'react-icons/fi';
 import { MdFormatBold, MdFormatItalic, MdFormatListBulleted } from 'react-icons/md';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from '../../utils/Js_axios';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Notes = () => {
+  const navigate = useNavigate();
   const [note, setNote] = useState('');
   const [isSaved, setIsSaved] = useState(false);
   const [charCount, setCharCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
-    const savedNote = localStorage.getItem('studentNotes');
-    if (savedNote) {
-      setNote(savedNote);
-      setCharCount(savedNote.length);
-    }
+    const fetchNote = async () => {
+      try {
+        const response = await axios.get('/content/notes');
+        setNote(response.data.data.content || '');
+        setCharCount(response.data.data.content?.length || 0);
+      } catch (err) {
+        console.error('Error fetching note:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNote();
   }, []);
 
-  const saveNote = () => {
-    localStorage.setItem('studentNotes', note);
-    setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 2000);
+  const saveNote = async () => {
+    try {
+      setIsLoading(true);
+      await axios.post('/content/notes', { content: note });
+      setIsSaved(true);
+      setTimeout(() => setIsSaved(false), 2000);
+    } catch (err) {
+      console.error('Error saving note:', err);
+      alert('Failed to save note. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const clearNote = () => {
+  const clearNote = async () => {
     if (window.confirm('Are you sure you want to clear your note?')) {
-      setNote('');
-      setCharCount(0);
-      localStorage.removeItem('studentNotes');
+      try {
+        setIsLoading(true);
+        await axios.delete('/content/notes');
+        setNote('');
+        setCharCount(0);
+      } catch (err) {
+        console.error('Error clearing note:', err);
+        alert('Failed to clear note. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -53,8 +83,50 @@ const Notes = () => {
     setCharCount(formattedText.length);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  const NavBar = () => (
+    <nav className="bg-white/10 backdrop-blur-sm border-b border-white/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-4">
+            <Link 
+              to="/student/dashboard"
+              className="flex items-center text-white hover:text-gray-300 transition-colors"
+            >
+              <FiArrowLeft className="mr-2" /> Back to Dashboard
+            </Link>
+            <span className="text-xl font-semibold text-white">EduPortal</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center">
+            </div>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-gray-900 to-black flex items-center justify-center">
+        <div className="text-white">Loading your notes...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-gray-900 to-black overflow-y-auto">
+      <NavBar />
       <div className="min-h-full flex flex-col">
         <div className="max-w-3xl mx-auto w-full p-6 flex-grow">
           <div className="flex items-center justify-between mb-6">
@@ -109,20 +181,21 @@ const Notes = () => {
           <div className="flex justify-end space-x-3 mt-4">
             <button
               onClick={clearNote}
-              className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              disabled={isLoading}
+              className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50"
             >
               <FiTrash2 className="mr-2" /> Clear
             </button>
             <button
               onClick={saveNote}
-              disabled={!note.trim()}
+              disabled={!note.trim() || isLoading}
               className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-                note.trim()
+                note.trim() && !isLoading
                   ? 'bg-blue-600 text-white hover:bg-blue-700'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
-              <FiSave className="mr-2" /> Save Note
+              <FiSave className="mr-2" /> {isLoading ? 'Saving...' : 'Save Note'}
             </button>
           </div>
 
