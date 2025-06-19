@@ -6,14 +6,25 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const token = localStorage.getItem('authToken');
+        if (!token) {
+          // No token means not authenticated
+          setUser(null);
+          return;
+        }
+
         const { data } = await axios.get('/auth/check');
         setUser(data.user);
+        setError(null);
       } catch (err) {
+        console.warn('Auth check failed:', err.response?.data?.message || err.message);
         setUser(null);
+        setError(err.response?.data?.message || 'Authentication failed');
       } finally {
         setLoading(false);
       }
@@ -23,7 +34,8 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
-    loading
+    loading,
+    error
   };
 
   return (

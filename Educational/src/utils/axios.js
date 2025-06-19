@@ -76,6 +76,23 @@ api.interceptors.response.use(
       };
     }
 
+    // Add specific handling for auth errors
+    if (error.response?.status === 401) {
+      localStorage.removeItem('authToken'); // Clear invalid token
+      error.response.data = {
+        ...error.response.data,
+        message: 'Authentication expired - please login again',
+        code: 'AUTH_EXPIRED'
+      };
+    }
+    else if (error.response?.status === 403) {
+      error.response.data = {
+        ...error.response.data,
+        message: 'Access forbidden - insufficient permissions',
+        code: 'AUTH_FORBIDDEN'
+      };
+    }
+
     return Promise.reject(error);
   }
 );

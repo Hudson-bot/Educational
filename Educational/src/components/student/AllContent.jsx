@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../../utils/axios';
+import axios from '../../utils/Js_axios';  // Updated import to match your axios configuration
 import { FiSearch, FiCalendar, FiBookmark, FiExternalLink, FiVideo, FiUser, FiFile } from 'react-icons/fi';
 import { FaRegStar, FaStar, FaRegHeart, FaHeart } from 'react-icons/fa';
 
@@ -22,11 +22,12 @@ const AllContent = () => {
       setIsLoadingFiles(true);
       setFileError(null);
       try {
-        const response = await axios.get('/api/content/getAll');
-        setFiles(response.data.filter(item => item.type === 'research')); 
+        const response = await axios.get('/content/myuploads');  // Updated endpoint
+        const papers = response.data.filter(item => item.type === 'paper');
+        setFiles(papers);
       } catch (err) {
         setFileError("Failed to fetch files. Please try again later.");
-        console.error(err);
+        console.error('Error fetching files:', err);
       } finally {
         setIsLoadingFiles(false);
       }
@@ -40,11 +41,12 @@ const AllContent = () => {
       setIsLoadingVideos(true);
       setVideoError(null);
       try {
-        const response = await axios.get('/api/content/getAll');
-        setVideos(response.data.filter(item => item.type === 'video')); 
+        const response = await axios.get('/content/myuploads');  // Updated endpoint
+        const videos = response.data.filter(item => item.type === 'video');
+        setVideos(videos);
       } catch (err) {
         setVideoError("Failed to fetch videos. Please try again later.");
-        console.error(err);
+        console.error('Error fetching videos:', err);
       } finally {
         setIsLoadingVideos(false);
       }
@@ -113,15 +115,25 @@ const AllContent = () => {
                       <h3 className="text-lg font-medium text-gray-800">{file.title}</h3>
                       <p className="text-sm text-gray-500">{formatDate(file.createdAt)}</p>
                       <p className="text-sm text-gray-600 mt-1">{file.description}</p>
+                      {file.tags && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {file.tags.map((tag, index) => (
+                            <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
                 <a
-                  href={`${import.meta.env.VITE_API_URL}/uploads/${file.file}`}
-                  download
+                  href={`${import.meta.env.VITE_API_URL}/uploads/${file.fileUrl}`} // Updated URL construction
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="mt-4 w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Download File
+                  View Paper
                 </a>
               </div>
             ))}
@@ -165,15 +177,26 @@ const AllContent = () => {
               <div key={video._id} className="border rounded-lg overflow-hidden bg-white shadow-sm">
                 <video 
                   className="w-full h-48 object-cover"
-                  src={`${import.meta.env.VITE_API_URL}/uploads/${video.file}`}
                   controls
-                />
+                >
+                  <source src={`${import.meta.env.VITE_API_URL}/uploads/${video.fileUrl}`} type="video/mp4" /> // Updated URL construction
+                  Your browser does not support the video tag.
+                </video>
                 <div className="p-4">
                   <h3 className="text-lg font-medium text-gray-800">{video.title}</h3>
                   <p className="text-sm text-gray-500 mt-1">{formatDate(video.createdAt)}</p>
                   <p className="text-sm text-gray-600 mt-1">{video.description}</p>
+                  {video.tags && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {video.tags.map((tag, index) => (
+                        <span key={index} className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <a
-                    href={`${import.meta.env.VITE_API_URL}/uploads/${video.file}`}
+                    href={`${import.meta.env.VITE_API_URL}${video.fileUrl}`}
                     download
                     className="mt-4 w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
