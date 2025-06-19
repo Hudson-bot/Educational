@@ -32,3 +32,12 @@ export const getUserUploads = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch uploads" });
   }
 };
+
+export const getAllContent = async (req, res) => {
+  try {
+    const allContent = await Content.find({});
+    res.json(allContent);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch all content" });
+  }
+};

@@ -1,5 +1,5 @@
 import express from "express";
-import { uploadContent, getUserUploads } from "../controllers/contentController.js";
+import { uploadContent, getUserUploads, getAllContent } from "../controllers/contentController.js";
 import { protect } from "../utils/protect.js";
 import multer from "multer";
 import path from "path";
@@ -22,5 +22,6 @@ const upload = multer({ storage });
 // Routes
 router.post("/upload", protect, upload.single("file"), uploadContent);
 router.get("/myuploads", protect, getUserUploads);
+router.get("/all", getAllContent); // <-- Add this line
 
 export default router;

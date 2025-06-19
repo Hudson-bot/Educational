@@ -22,7 +22,7 @@ const AllContent = () => {
       setIsLoadingFiles(true);
       setFileError(null);
       try {
-        const response = await axios.get('/content/myuploads');  // Updated endpoint
+        const response = await axios.get('/content/all'); // Changed endpoint
         const papers = response.data.filter(item => item.type === 'paper');
         setFiles(papers);
       } catch (err) {
@@ -41,7 +41,7 @@ const AllContent = () => {
       setIsLoadingVideos(true);
       setVideoError(null);
       try {
-        const response = await axios.get('/content/myuploads');  // Updated endpoint
+        const response = await axios.get('/content/all'); // Changed endpoint
         const videos = response.data.filter(item => item.type === 'video');
         setVideos(videos);
       } catch (err) {

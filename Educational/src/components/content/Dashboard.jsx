@@ -23,7 +23,7 @@ const Dashboard = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem("token");
-        const res = await api.get('/content/myuploads', {
+        const res = await api.get('/v1/content/myuploads', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUploads(res.data);

@@ -33,7 +33,7 @@ const UploadContent = ({ selectedType }) => {
 
     try {
       const token = localStorage.getItem("token");
-      await api.post("/content/upload", uploadData, {
+      await api.post("/v1/content/upload", uploadData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",
