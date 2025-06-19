@@ -1,28 +1,57 @@
 import React, { useEffect, useState } from 'react';
-import axios from '../../utils/Js_axios';  // Updated import to match your axios configuration
+import axios from '../../utils/Js_axios';
 import { FiSearch, FiCalendar, FiBookmark, FiExternalLink, FiVideo, FiUser, FiFile } from 'react-icons/fi';
 import { FaRegStar, FaStar, FaRegHeart, FaHeart } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
 
 const AllContent = () => {
-  // Files state
   const [files, setFiles] = useState([]);
   const [searchFiles, setSearchFiles] = useState('');
   const [isLoadingFiles, setIsLoadingFiles] = useState(true);
   const [fileError, setFileError] = useState(null);
-
-  // Videos state
   const [videos, setVideos] = useState([]);
   const [searchVideos, setSearchVideos] = useState('');
   const [isLoadingVideos, setIsLoadingVideos] = useState(true);
   const [videoError, setVideoError] = useState(null);
+  const navigate = useNavigate();
 
-  // Fetch files from backend
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  const NavBar = () => (
+    <nav className="bg-white/10 backdrop-blur-sm border-b border-white/20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-4">
+            <Link 
+              to="/student/dashboard"
+              className="flex items-center text-white hover:text-gray-300 transition-colors"
+            >
+              <span className="mr-2">&#8592;</span> Back to Dashboard
+            </Link>
+            <span className="text-xl font-semibold text-white">EduPortal</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+
   useEffect(() => {
     const fetchFiles = async () => {
       setIsLoadingFiles(true);
       setFileError(null);
       try {
-        const response = await axios.get('/content/all'); // Changed endpoint
+        const response = await axios.get('/content/all');
         const papers = response.data.filter(item => item.type === 'paper');
         setFiles(papers);
       } catch (err) {
@@ -35,13 +64,12 @@ const AllContent = () => {
     fetchFiles();
   }, []);
 
-  // Fetch videos from backend
   useEffect(() => {
     const fetchVideos = async () => {
       setIsLoadingVideos(true);
       setVideoError(null);
       try {
-        const response = await axios.get('/content/all'); // Changed endpoint
+        const response = await axios.get('/content/all');
         const videos = response.data.filter(item => item.type === 'video');
         setVideos(videos);
       } catch (err) {
@@ -54,12 +82,10 @@ const AllContent = () => {
     fetchVideos();
   }, []);
 
-  // File filters
   const filteredFiles = files
     .filter(f => f.title.toLowerCase().includes(searchFiles.toLowerCase()))
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-  // Video filters
   const filteredVideos = videos
     .filter(v => v.title.toLowerCase().includes(searchVideos.toLowerCase()))
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -73,14 +99,13 @@ const AllContent = () => {
   };
 
   return (
-    <div className="all-content p-6 max-w-6xl mx-auto space-y-12">
-      {/* Files Section */}
+    <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-gray-900 to-black overflow-y-auto p-6">
+      <NavBar />
       <section className="files">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">Educational Files</h2>
           <p className="text-gray-600">Browse all educational materials</p>
         </div>
-        
         <div className="filters mb-6">
           <div className="relative flex-grow max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -95,7 +120,6 @@ const AllContent = () => {
             />
           </div>
         </div>
-
         {isLoadingFiles ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -128,7 +152,7 @@ const AllContent = () => {
                   </div>
                 </div>
                 <a
-                  href={`${import.meta.env.VITE_API_URL}/uploads/${file.fileUrl}`} // Updated URL construction
+                  href={`${import.meta.env.VITE_API_URL}/uploads/${file.fileUrl}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-4 w-full inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -140,14 +164,11 @@ const AllContent = () => {
           </div>
         )}
       </section>
-
-      {/* Videos Section */}
       <section className="videos">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-2">Educational Videos</h2>
           <p className="text-gray-600">Browse all educational videos</p>
         </div>
-        
         <div className="filters mb-6">
           <div className="relative flex-grow max-w-md">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -162,7 +183,6 @@ const AllContent = () => {
             />
           </div>
         </div>
-
         {isLoadingVideos ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -179,7 +199,7 @@ const AllContent = () => {
                   className="w-full h-48 object-cover"
                   controls
                 >
-                  <source src={`${import.meta.env.VITE_API_URL}/uploads/${video.fileUrl}`} type="video/mp4" /> // Updated URL construction
+                  <source src={`${import.meta.env.VITE_API_URL}/uploads/${video.fileUrl}`} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
                 <div className="p-4">
