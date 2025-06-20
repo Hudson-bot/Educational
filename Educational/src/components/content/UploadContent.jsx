@@ -1,7 +1,7 @@
 import { useState } from "react";
 import api from "../../utils/axios";
 
-const UploadContent = ({ selectedType }) => {
+const UploadContent = ({ selectedType, onBack }) => {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -63,7 +63,14 @@ const UploadContent = ({ selectedType }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6 mt-8">
+    <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-auto max-h-screen p-6 mt-8">
+      <button
+        type="button"
+        onClick={onBack}
+        className="mb-4 text-blue-600 hover:text-blue-800 font-medium flex items-center"
+      >
+        &#8592; Back
+      </button>
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800">
           Upload {selectedType === "video" ? "Video" : "Research Paper"}

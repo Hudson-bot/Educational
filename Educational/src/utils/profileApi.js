@@ -22,3 +22,32 @@ export const updateProfile = async (profileData) => {
     throw error;
   }
 };
+export const createTeacher = async (teacherData) => {
+  try {
+    const response = await axios.post('/teachers', teacherData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating teacher:', error);
+    throw error;
+  }
+};
+
+export const getTeachers = async () => {
+  try {
+    const response = await axios.get('/teachers');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching teachers:', error);
+    throw error;
+  }
+};
+
+export const deleteTeacher = async (id) => {
+  try {
+    const response = await axios.delete(`/teachers/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting teacher:', error);
+    throw error;
+  }
+};

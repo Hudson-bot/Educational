@@ -10,6 +10,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import notesRoutes from './routes/notesRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
+import teacherRoutes from './routes/teacherRoutes.js';
 
 dotenv.config();
 connectDB();
@@ -36,6 +37,7 @@ app.use('/api/v1/content', contentRoutes);
 app.use('/api/interview', interviewRoutes);
 app.use('/api/v1/content/notes', notesRoutes);
 app.use('/api/v1/profile', profileRoutes);
+app.use('/api/v1/teachers', teacherRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;

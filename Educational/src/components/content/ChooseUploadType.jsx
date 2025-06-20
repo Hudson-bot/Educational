@@ -1,16 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import UploadContent from "./UploadContent";
+import TeacherDialog from "./TeacherDialog";
+import { FiVideo, FiFileText, FiUserPlus, FiLogOut, FiHome } from "react-icons/fi";
 
 const ChooseUploadType = () => {
   const [type, setType] = useState("");
   const [userData, setUserData] = useState(null);
+  const [showTeacherDialog, setShowTeacherDialog] = useState(false);
+  const [teachers, setTeachers] = useState([]);
+  const [initialTeacher, setInitialTeacher] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (user) {
       setUserData(user);
+      // Load saved teachers from localStorage if available
+      const savedTeachers = JSON.parse(localStorage.getItem('teachers')) || [];
+      setTeachers(savedTeachers);
     }
   }, []);
 
@@ -23,25 +31,61 @@ const ChooseUploadType = () => {
     setType(selectedType);
   };
 
+  const handleSaveTeacher = (teacherInfo) => {
+    const updatedTeachers = [...teachers, teacherInfo];
+    setTeachers(updatedTeachers);
+    localStorage.setItem('teachers', JSON.stringify(updatedTeachers));
+  };
+
+  const handleRemoveTeacher = (index) => {
+    const updatedTeachers = teachers.filter((_, i) => i !== index);
+    setTeachers(updatedTeachers);
+    localStorage.setItem('teachers', JSON.stringify(updatedTeachers));
+  };
+
+  const handleOpenTeacherDialog = () => {
+    if (teachers.length > 0) {
+      setInitialTeacher(teachers[teachers.length - 1]);
+    } else {
+      setInitialTeacher(null);
+    }
+    setShowTeacherDialog(true);
+  };
+
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-purple-900 via-gray-900 to-black overflow-hidden min-h-screen flex flex-col">
       {/* Header */}
-      <div className="w-full bg-gray-800 p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">
+      <div className="w-full bg-gray-800/90 backdrop-blur-sm p-4 flex justify-between items-center border-b border-gray-700">
+        <div>
+          <span className="text-2xl font-bold text-white">EduPortal</span>
+        </div>
+         <span className="text-2xl font-bold text-white">
           Welcome, {userData?.name || 'User'}
-        </h1>
-        <div className="flex gap-4">
+        </span>
+        <div className="flex gap-3">
+          <button
+            onClick={handleOpenTeacherDialog}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
+            title="Add Teacher"
+          >
+            <FiUserPlus size={18} />
+            <span className="hidden sm:inline">Details</span>
+          </button>
           <button
             onClick={() => navigate('/dashboard')}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            title="Dashboard"
           >
-            Dashboard
+            <FiHome size={18} />
+            <span className="hidden sm:inline">Dashboard</span>
           </button>
           <button
             onClick={handleLogout}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+            title="Logout"
           >
-            Logout
+            <FiLogOut size={18} />
+            <span className="hidden sm:inline">Logout</span>
           </button>
         </div>
       </div>
@@ -49,50 +93,74 @@ const ChooseUploadType = () => {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center p-4">
         {!type ? (
-          <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 space-y-6">
-            <h2 className="text-2xl font-bold text-gray-800 text-center">
+          <div className="w-full max-w-2xl bg-white/10 backdrop-blur-sm rounded-xl shadow-lg p-8 space-y-6 border border-white/10">
+            <h2 className="text-3xl font-bold text-white text-center">
               Select Upload Type
             </h2>
-            <p className="text-gray-600 text-center">
-              What would you like to upload today?
+            <p className="text-gray-300 text-center text-lg">
+              Choose what you'd like to upload to the platform
             </p>
             
-            <div className="grid grid-cols-1 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+              {/* Video Upload Option */}
               <button
                 onClick={() => handleChoice("video")}
-                className="flex items-center justify-center p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 group"
+                className="group relative bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-blue-400 rounded-xl p-6 transition-all duration-300 overflow-hidden"
               >
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-4 group-hover:bg-blue-200 transition-all duration-200">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <h3 className="font-medium text-gray-900">Video</h3>
-                  <p className="text-sm text-gray-500">MP4, MOV, AVI up to 100MB</p>
+                <div className="absolute inset-0 bg-blue-500/10 group-hover:bg-blue-500/20 transition-all duration-300"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-500/30 transition-all">
+                    <FiVideo className="text-blue-400 text-2xl" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Upload Video</h3>
+                  <p className="text-gray-300 text-center text-sm">
+                    Educational videos, lectures, or tutorials
+                  </p>
+                  <div className="mt-4 text-xs text-blue-300">
+                    Supported: MP4, MOV, AVI (max 100MB)
+                  </div>
                 </div>
               </button>
               
+              {/* Paper Upload Option */}
               <button
                 onClick={() => handleChoice("paper")}
-                className="flex items-center justify-center p-4 border-2 border-gray-200 rounded-lg hover:border-green-500 hover:bg-green-50 transition-all duration-200 group"
+                className="group relative bg-white/5 hover:bg-white/10 border-2 border-white/10 hover:border-green-400 rounded-xl p-6 transition-all duration-300 overflow-hidden"
               >
-                <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover:bg-green-200 transition-all duration-200">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div className="text-left">
-                  <h3 className="font-medium text-gray-900">Research Paper</h3>
-                  <p className="text-sm text-gray-500">PDF, DOCX up to 10MB</p>
+                <div className="absolute inset-0 bg-green-500/10 group-hover:bg-green-500/20 transition-all duration-300"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4 group-hover:bg-green-500/30 transition-all">
+                    <FiFileText className="text-green-400 text-2xl" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-white mb-2">Upload Research Paper</h3>
+                  <p className="text-gray-300 text-center text-sm">
+                    Academic papers, articles, or study materials
+                  </p>
+                  <div className="mt-4 text-xs text-green-300">
+                    Supported: PDF, DOCX (max 10MB)
+                  </div>
                 </div>
               </button>
             </div>
           </div>
         ) : (
-          <UploadContent selectedType={type} />
+          <UploadContent 
+            selectedType={type} 
+            teachers={teachers}
+            onBack={() => setType("")}
+          />
         )}
       </div>
+
+    
+
+      {/* Teacher Dialog */}
+      <TeacherDialog
+        isOpen={showTeacherDialog}
+        onClose={() => setShowTeacherDialog(false)}
+        onSave={handleSaveTeacher}
+        initialTeacher={initialTeacher}
+      />
     </div>
   );
 };
