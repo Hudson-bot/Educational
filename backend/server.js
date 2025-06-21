@@ -19,7 +19,7 @@ const app = express();
 
 // Enable CORS
 app.use(cors({
-  origin: 'https://eduportalapp.netlify.app/',
+  origin: 'https://eduportalapp.netlify.app', // removed trailing slash
   credentials: true
 }));
 
