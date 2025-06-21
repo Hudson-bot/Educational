@@ -19,7 +19,7 @@ const app = express();
 
 // Enable CORS
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: 'https://eduportal1.netlify.app/',
   credentials: true
 }));
 
