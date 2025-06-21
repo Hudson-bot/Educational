@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:5000/api/v1', // Your backend base URL
+  baseURL: 'https://educational-yclh.onrender.com/api/v1', // Your backend base URL
 });
 
 // Request interceptor

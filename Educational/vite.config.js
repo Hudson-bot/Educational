@@ -6,13 +6,13 @@ export default defineConfig({
   server: {
     proxy: {
       '/interview': {
-        target: 'http://localhost:5000',
+        target: 'https://educational-yclh.onrender.com',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/interview/, '/api/interview'),
         secure: false,
       },
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://educational-yclh.onrender.com',
         changeOrigin: true,
         secure: false,
       }
