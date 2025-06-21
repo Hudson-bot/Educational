@@ -1,4 +1,4 @@
-import generateQuestionsFromSkills from '../utils/openrouter.js';
+import generateQuestionsFromSkills from '../utils/openRouter.js';
 
 export const generateQuestions = async (req, res) => {
   try {
