@@ -54,7 +54,7 @@ export const forgotPassword = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const token = generateToken(user._id);
-    const resetUrl = `http://localhost:3000/reset-password/${token}`;
+    const resetUrl = `https://eduportal1.netlify.app/reset-password/${token}`;
 
     await sendEmail({
       to: email,

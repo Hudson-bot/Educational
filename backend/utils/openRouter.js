@@ -25,7 +25,7 @@ async function generateQuestionsFromSkills(githubLink, skills, prompt) {
             {
                 headers: {
                     'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                    'HTTP-Referer': process.env.FRONTEND_URL || 'http://localhost:3000',
+                    'HTTP-Referer': process.env.FRONTEND_URL || 'https://eduportal1.netlify.app',
                     'Content-Type': 'application/json'
                 },
                 timeout: 15000
